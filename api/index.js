@@ -1,14 +1,20 @@
 const express = require('express');
 const path = require('path')
+const bodyParser = require('body-parser');
 require('dotenv').config({ path: path.resolve(__dirname, './config.env') })
 
 const config = require('./config/config');
 const database = require('./database/db');
 const defaultRoute = require('./routes/defaultRoute');
+const restaurantRoute = require('./routes/restaurantRoute');
 
 const app = express();
 
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use('/', defaultRoute)
+app.use('/api', restaurantRoute)
 
 const PORT = config.port;
 app.listen(PORT, () => {
