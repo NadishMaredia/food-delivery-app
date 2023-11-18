@@ -1,30 +1,23 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, './config.env') })
 
+const config = require('./config/config');
+const database = require('./database/db');
+const defaultRoute = require('./routes/defaultRoute');
+
 const app = express();
 
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+app.use('/', defaultRoute)
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
-
-app.get('/', (req, res) => {
-  res.send('Hello, this is your Express server!');
-});
-
-const PORT = process.env.PORT || 5000;
+const PORT = config.port;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
 process.on('SIGINT', () => {
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection disconnected through app termination');
-    process.exit(0);
+    database.connection.close(() => {
+      console.log('MongoDB connection disconnected through app termination');
+      process.exit(0);
+    });
   });
-});
