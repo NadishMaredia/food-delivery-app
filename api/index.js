@@ -7,6 +7,7 @@ const config = require('./config/config');
 const database = require('./database/db');
 const defaultRoute = require('./routes/defaultRoute');
 const restaurantRoute = require('./routes/restaurantRoute');
+const menuRoute = require('./routes/menuRoute');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', defaultRoute)
 app.use('/api', restaurantRoute)
+app.use('/api', menuRoute)
 
 const PORT = config.port;
 app.listen(PORT, () => {

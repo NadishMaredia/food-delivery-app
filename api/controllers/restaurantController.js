@@ -2,13 +2,14 @@ const Restaurant = require('../models/restaurant');
 
 const addRestaurant = async (req, res) => {
 
-    const { name, description, address, postalcode } = req.body;
+    const { name, description, address, postalcode, image } = req.body;
 
     const newRestaurant = new Restaurant({
         name,
         description,
         address,
-        postalcode
+        postalcode, 
+        image
     });
 
     try {
