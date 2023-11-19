@@ -44,18 +44,48 @@ const addRestaurant = async (req, res) => {
 const getAllRestaurant = async (req, res) => {
 
     try {
-        const restaurantList = await Restaurant.find();
+        // Pagination
+        const page = parseInt(req.query.page) || 1; // Default to page 1
+        const limit = parseInt(req.query.limit) || 10; // Default to limit 10
+
+        // Sorting
+        const sortField = req.query.sortField || 'name'; // Default to sorting by name
+        const sortOrder = req.query.sortOrder && req.query.sortOrder.toLowerCase() === 'desc' ? -1 : 1;
+
+        // Calculate skip value for pagination
+        const skip = (page - 1) * limit;
+
+        const searchQuery = req.query.search || ''; // Default to empty string
+
+        // Build the search criteria using regular expressions
+        const searchCriteria = {
+            $or: [
+                { name: { $regex: searchQuery, $options: 'i' } }
+            ],
+        };
+
+        // Query to get paginated and sorted restaurants
+        const restaurants = await Restaurant.find(searchCriteria)
+            .sort({ [sortField]: sortOrder })
+            .skip(skip)
+            .limit(limit);
+
+        // Count total number of restaurants
+        const totalRestaurants = await Restaurant.countDocuments();
 
         res.json({
-            message: 'Restaurant list fetch successfully',
-            restaurantList
-        })
+            message: 'Restaurants fetched successfully',
+            restaurants,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalRestaurants / limit),
+                totalItems: totalRestaurants,
+                itemsPerPage: limit,
+            },
+        });
     } catch (error) {
-
-        res.json({
-            message: 'Some issue fetching restaurant list'
-        })
-
+        console.error('Error fetching restaurants:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 
 }
